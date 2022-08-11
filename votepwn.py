@@ -64,8 +64,8 @@ if args.help:
 
 # Establish target ip or call help() and exit the program
 if args.rshell:
-    if not args.lhost or not args.lport:
-        print("[!] - When choosing reverse shell, listen host and listen port must be given")
+    if not args.lhost:
+        print("[!] - When choosing reverse shell, listen host must be given")
         exit(0)
     target = args.rshell
 elif args.remote:
