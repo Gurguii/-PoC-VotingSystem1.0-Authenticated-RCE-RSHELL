@@ -4,7 +4,7 @@
 # Author: Gurguii
 # Tested in HackTheBox - Love(easy)
 # Thanks to Dhayalanb (https://github.com/Dhayalanb) because I got the rshell php payload from his github.
-# Thanks to Richard Jones (https://www.exploit-db.com/exploits/49445) because I learnt how to upload a nonexistent file with content thanks to his exploit.
+# Thanks to Richard Jones (https://www.exploit-db.com/exploits/49445) his exploit helped me understanding the upload part(python code).
 
 from argparse import ArgumentParser,SUPPRESS
 import requests,sys,ctypes,os
